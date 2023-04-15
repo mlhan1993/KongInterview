@@ -3,8 +3,8 @@ package service
 import "time"
 
 type Detail struct {
-	Name        string
 	ID          string
-	Version     string
+	Tag         string
+	ServiceID   uint
 	DateCreated time.Time
 }

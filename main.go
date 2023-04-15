@@ -2,26 +2,46 @@ package main
 
 import (
 	"database/sql"
-	"log"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+	"github.com/mlhan1993/KongInterview/pkg/config"
+	v1Handlers "github.com/mlhan1993/KongInterview/pkg/handlers/v1"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 
-	_ "github.com/go-sql-driver/mysql"
-	v1Handlers "github.com/mlhan1993/KongInterview/pkg/handlers/v1"
+	"github.com/mlhan1993/KongInterview/pkg/db"
+	"github.com/mlhan1993/KongInterview/pkg/middlewares"
 )
 
 func main() {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(log.DebugLevel)
+
+	dbURI := config.GetDBURI()
 	// Connect to the MySQL database
-	db, err := sql.Open("mysql", "username:password@tcp(127.0.0.1:3306)/database_name")
+	conn, err := sql.Open("mysql", dbURI)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	if err = conn.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	defer conn.Close()
+	serviceDb, err := db.NewService(conn)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a new HTTP server
-	server := http.NewServeMux()
+	server := mux.NewRouter()
+
+	// Middlewares
+	server.Use(middlewares.RequestIDMiddleware)
+	server.Use(middlewares.LogRequestMiddleware)
 
 	// Register the v1 handler functions
-	v1 := v1Handlers.NewV1(db)
+	v1 := v1Handlers.NewV1(serviceDb)
 	server.HandleFunc("/v1/service/overview", v1.PostRetrieveServiceOverview)
 	server.HandleFunc("/v1/service/details", v1.PostRetrieveServiceDetails)
 
@@ -31,4 +51,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
