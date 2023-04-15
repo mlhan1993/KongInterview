@@ -12,21 +12,21 @@ import (
 	"github.com/mlhan1993/KongInterview/internal/service"
 )
 
-type Service struct {
+type Kong struct {
 	db *sql.DB
 }
 
-func NewService(db *sql.DB) (*Service, error) {
-	s := &Service{
+func NewKong(db *sql.DB) (*Kong, error) {
+	s := &Kong{
 		db: db,
 	}
 	return s, nil
 }
 
-func (s *Service) GetServiceOverview(ctx context.Context, numPerPage, pageNumber uint, sortOrder, filter string) (uint, []service.Overview, error) {
-	var overviews []service.Overview
+func (s *Kong) GetServices(ctx context.Context, numPerPage, pageNumber uint, sortOrder, filter string) (uint, []service.Service, error) {
+	var services []service.Service
 
-	query := getServiceOverviewQuery(numPerPage, pageNumber, sortOrder, filter)
+	query := getServicesQuery(numPerPage, pageNumber, sortOrder, filter)
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
@@ -37,27 +37,27 @@ func (s *Service) GetServiceOverview(ctx context.Context, numPerPage, pageNumber
 
 	var total uint
 	for rows.Next() {
-		var overview service.Overview
+		var myService service.Service
 		//
-		if err := rows.Scan(&overview.ID, &overview.Name, &overview.Description, &overview.NumVersions, &total); err != nil {
+		if err := rows.Scan(&myService.ID, &myService.Name, &myService.Description, &myService.NumVersions, &total); err != nil {
 			return 0, nil, err
 		}
 
-		overviews = append(overviews, overview)
+		services = append(services, myService)
 	}
 
 	if err := rows.Err(); err != nil {
 		return 0, nil, err
 	}
 
-	return total, overviews, nil
+	return total, services, nil
 }
 
-func (s *Service) GetServiceDetails(ctx context.Context, serviceId, numPerPage, pageNumber uint, sortOrder string) (uint, []service.Detail, error) {
-	// Implement GetServiceDetails method
-	var details []service.Detail
+func (s *Kong) GetVersions(ctx context.Context, serviceId, numPerPage, pageNumber uint, sortOrder string) (uint, []service.Version, error) {
+	// Implement GetVersions method
+	var versions []service.Version
 
-	query := getServiceDetailQuery(serviceId, numPerPage, pageNumber, sortOrder)
+	query := getVersionsQuery(serviceId, numPerPage, pageNumber, sortOrder)
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		return 0, nil, err
@@ -67,22 +67,22 @@ func (s *Service) GetServiceDetails(ctx context.Context, serviceId, numPerPage, 
 
 	var total uint
 	for rows.Next() {
-		var detail service.Detail
+		var myVersion service.Version
 		var dateCreated string
 
-		if err := rows.Scan(&detail.ID, &detail.Tag, &detail.ServiceID, &dateCreated, &total); err != nil {
+		if err := rows.Scan(&myVersion.ID, &myVersion.Tag, &myVersion.ServiceID, &dateCreated, &total); err != nil {
 			return 0, nil, err
 		}
-		detail.DateCreated, err = time.Parse("2006-01-02 15:04:05", dateCreated)
+		myVersion.DateCreated, err = time.Parse("2006-01-02 15:04:05", dateCreated)
 		if err != nil {
 			return 0, nil, err
 		}
-		details = append(details, detail)
+		versions = append(versions, myVersion)
 	}
-	return total, details, nil
+	return total, versions, nil
 }
 
-func getServiceOverviewQuery(numPerPage, pageNumber uint, sortOrder string, filter string) string {
+func getServicesQuery(numPerPage, pageNumber uint, sortOrder string, filter string) string {
 	totalQuery := squirrel.Select("*, COUNT(*) OVER () AS total").From("services")
 	if filter != "" {
 		totalQuery = totalQuery.Where(fmt.Sprintf("name LIKE \"%%%s%%\" OR description LIKE \"%%%s%%\"",
@@ -109,7 +109,7 @@ func getServiceOverviewQuery(numPerPage, pageNumber uint, sortOrder string, filt
 	return s
 }
 
-func getServiceDetailQuery(serviceID, numPerPage, pageNumber uint, sortOrder string) string {
+func getVersionsQuery(serviceID, numPerPage, pageNumber uint, sortOrder string) string {
 
 	totalQuery := squirrel.Select("Count(*) as total").From("versions").
 		Where(fmt.Sprintf("serviceID = %d", serviceID))

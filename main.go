@@ -28,7 +28,7 @@ func main() {
 	}
 
 	defer conn.Close()
-	serviceDb, err := db.NewService(conn)
+	serviceDb, err := db.NewKong(conn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,8 +42,8 @@ func main() {
 
 	// Register the v1 handler functions
 	v1 := v1Handlers.NewV1(serviceDb)
-	server.HandleFunc("/v1/service/overview", v1.PostRetrieveServiceOverview)
-	server.HandleFunc("/v1/service/details", v1.PostRetrieveServiceDetails)
+	server.HandleFunc("/v1/service", v1.PostRetrieveServices)
+	server.HandleFunc("/v1/version", v1.PostRetrieveVersions)
 
 	// Start the server
 	log.Println("Starting server on port 8080")

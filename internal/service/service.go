@@ -1,7 +1,7 @@
 package service
 
-// Overview holds general information about the service
-type Overview struct {
+// Service holds general information about the service
+type Service struct {
 	Name        string `json:"name"`
 	ID          string `json:"id"`
 	Description string `json:"description"`
