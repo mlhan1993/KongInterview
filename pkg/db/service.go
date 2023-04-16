@@ -121,9 +121,9 @@ func getVersionsQuery(serviceID, numPerPage, pageNumber uint, sortOrder string) 
 		Where(fmt.Sprintf("serviceID = %d", serviceID))
 
 	if sortOrder == "desc" {
-		sb.OrderBy("dateCreated desc")
+		sb = sb.OrderBy("dateCreated desc")
 	} else {
-		sb.OrderBy("dateCreated asc")
+		sb = sb.OrderBy("dateCreated asc")
 	}
 	if pageNumber > 0 {
 		sb = sb.Limit(uint64(numPerPage)).Offset(uint64(numPerPage * (pageNumber - 1)))

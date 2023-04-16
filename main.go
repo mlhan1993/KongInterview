@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -14,9 +15,31 @@ import (
 	"github.com/mlhan1993/KongInterview/pkg/middlewares"
 )
 
+func initLogger(serverConfig *config.ServerConfig) error {
+	level, err := log.ParseLevel(serverConfig.LogLevel)
+	if err != nil {
+		return err
+	}
+	log.SetLevel(level)
+	return nil
+}
+
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
-	log.SetLevel(log.DebugLevel)
+
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "config/config.yml"
+	}
+
+	cfg, err := config.GetServerConfig(configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err = initLogger(cfg); err != nil {
+		log.Fatal(err)
+	}
 
 	dbURI := config.GetDBURI()
 	// Connect to the MySQL database
