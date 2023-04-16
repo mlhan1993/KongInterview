@@ -84,11 +84,10 @@ func NewV1(db KongDB) *V1 {
 }
 
 func (h *V1) PostRetrieveServices(w http.ResponseWriter, r *http.Request) {
-	// Parse the JSON request body
 	var req GetServicesRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		utils.ResponseFromError(errors.NewBadRequestError("invalid request format"), w)
+		utils.ResponseFromError(errors.NewBadRequestError(err.Error()), w)
 		utils.LogRequestError(err, r)
 		return
 	}
@@ -108,20 +107,24 @@ func (h *V1) PostRetrieveServices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send the response as JSON
 	res := GetServicesResponse{
 		Total:    totalServices,
 		Services: services,
 	}
+	if len(services) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
 	json.NewEncoder(w).Encode(res)
 }
 
 func (h *V1) PostRetrieveVersions(w http.ResponseWriter, r *http.Request) {
-	// Parse the JSON request body
 	var req GetVersionsRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		utils.ResponseFromError(errors.NewBadRequestError("invalid request format"), w)
+		utils.ResponseFromError(errors.NewBadRequestError(err.Error()), w)
 		utils.LogRequestError(err, r)
 		return
 	}
@@ -141,10 +144,16 @@ func (h *V1) PostRetrieveVersions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send the response as JSON
 	res := GetVersionResponse{
 		Total:    total,
 		Versions: versions,
 	}
+
+	if len(versions) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
 	json.NewEncoder(w).Encode(res)
 }

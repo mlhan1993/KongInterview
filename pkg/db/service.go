@@ -24,7 +24,7 @@ func NewKong(db *sql.DB) (*Kong, error) {
 }
 
 func (s *Kong) GetServices(ctx context.Context, numPerPage, pageNumber uint, sortOrder, filter string) (uint, []service.Service, error) {
-	var services []service.Service
+	services := []service.Service{}
 
 	query := getServicesQuery(numPerPage, pageNumber, sortOrder, filter)
 
@@ -54,8 +54,7 @@ func (s *Kong) GetServices(ctx context.Context, numPerPage, pageNumber uint, sor
 }
 
 func (s *Kong) GetVersions(ctx context.Context, serviceId, numPerPage, pageNumber uint, sortOrder string) (uint, []service.Version, error) {
-	// Implement GetVersions method
-	var versions []service.Version
+	versions := []service.Version{}
 
 	query := getVersionsQuery(serviceId, numPerPage, pageNumber, sortOrder)
 	rows, err := s.db.QueryContext(ctx, query)

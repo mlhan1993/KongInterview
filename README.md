@@ -52,7 +52,35 @@ Import the `Insomnia_KongInterview_API.json` https://docs.insomnia.rest/insomnia
 - DB read is much more frequent than write
 - It's ok to pre-populate some data for dev purposes. 
 - Versions have "version tags" and they are string formatted.
-- 
+
+# Test plan
+
+### v1/service 
+- filter: empty filter, filter for exists service, filter for non-exists service, filter key doesn't exists
+  - filter for name
+  - filter for description
+- sortOrder:  asc, desc, bad_order, sort key doesn't exists
+- pageNumber exists but no numPerPage
+- NumPerPage exists but no pageNumber
+- 0 pageNumber 1 numPerPage
+- 1 pageNumer 0 numPerPage
+- Check for:
+  - correct total
+  - correct services
+  - correct status
+- bad request data type
+- empty services should be [] not null
+
+### v1/versions
+- serviceID: key doesn't exist, good service id, non-exists serviceID
+- sortOrder: asc, desc, bad_order, sort key doesn't exits
+- PageNumber/numPerPage similar to v1/service
+- check for 
+  - correct total
+  - correct versions
+  - correct status
+- empty versions should be [] not null
+
 
 # API documentation
 
