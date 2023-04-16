@@ -2,14 +2,15 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
-	"github.com/mlhan1993/KongInterview/pkg/config"
-	v1Handlers "github.com/mlhan1993/KongInterview/pkg/handlers/v1"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/mlhan1993/KongInterview/pkg/config"
 	"github.com/mlhan1993/KongInterview/pkg/db"
+	v1Handlers "github.com/mlhan1993/KongInterview/pkg/handlers/v1"
 	"github.com/mlhan1993/KongInterview/pkg/middlewares"
 )
 

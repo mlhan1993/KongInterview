@@ -19,7 +19,13 @@ func ResponseFromError(err error, w http.ResponseWriter) {
 		statusCode = http.StatusInternalServerError
 		err = fmt.Errorf("internal server error")
 	}
-	http.Error(w, err.Error(), statusCode)
+
+	msg := errors.ErrorMessage{
+		Message:    err.Error(),
+		StatusCode: statusCode,
+	}
+
+	http.Error(w, msg.ToString(), statusCode)
 }
 
 func LogRequestError(err error, r *http.Request) {

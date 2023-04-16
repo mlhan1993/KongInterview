@@ -11,6 +11,49 @@ docker-compose up
 
 Import the `Insomnia_KongInterview_API.json` https://docs.insomnia.rest/insomnia/import-export-data
 
+# Design Considerations
+
+### Database
+
+- Using mysql as a db for the following reasons
+  - join operation is needed
+  - low write and high read
+  - Data volume likely low and less need for scaling 
+- Schema design consideration
+  - service - version is a 1 to many relationship, therefore version should contain service id
+  - version's serviceID reference service's id to avoid version without services
+  - unique key on version tag and service id to avoid duplication. 
+- Query consideration
+  - While it's true that using `LIKE` could reduce performance, the number of services are likely not extremely high, therefore it should be ok for the first iteration
+  - Filtering first then join will increase performance
+
+### API
+- using gorilla as a library for better middleware syntax
+- Introduced some middlewares
+  - adding request id to request for better tracking / logging
+  - adding logging of the request itself for easier debugging in the future in case something is wrong. 
+- Separate end point for versions and services as standard REST api practice for different resources
+- Used a logging library for json fmt logging, which allow easier parsing and query if a logging pipeline exists
+- Versions for handlers to support future changes
+- Interfaces between handlers and db layer to allow plug and play in case implementation changes
+- Using environment variables for db connection properties for better security and deployment configurability
+  - Comparing to a config file, i think using an environment variable is slightly more secure, and given 
+- Introduce special error types for convent api response 
+
+### Local testing and containerization
+- single docker-compose file for easy local testing
+- separate Dockerfile so db and app can be build separately
+- Insomnia json file for easy local testing. 
+
+
+# Assumptions
+- I'm able to talk with the stakeholders to make small changes regarding api route names and certain small updates on the request body/response body
+- The number of services is not huge
+- DB read is much more frequent than write
+- It's ok to pre-populate some data for dev purposes. 
+- Versions have "version tags" and they are string formatted.
+- 
+
 # API documentation
 
 ### /v1/service
